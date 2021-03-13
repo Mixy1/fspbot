@@ -142,7 +142,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
         async function vcKick() {
             await newState.member.voice.kick();
-            client.channels.cache.get("820219287938793523").messages.fetch("820231421465591829").then(message => message.edit(">>> 🤡 has been **kicked**🎉🎉🎉🎉 - Courtesy of <@91974715383488512>\n" + Date().toLocaleString('en-GB', { timeZone: 'GMT+1' })));
+            client.channels.cache.get("820219287938793523").messages.fetch("820231421465591829").then(message => message.edit(">>> 🤡 has been **kicked**🎉🎉🎉🎉 - Courtesy of <@91974715383488512>\n" + Date().toLocaleString('en-GB', { timeZone: 'Europe/Malta' })));
         }
         if (oldChannel === null && newChannel !== null && newState.member.id == kick_X) {
             let randomDC = genRandomDC() * 1000;
@@ -198,7 +198,7 @@ async function accessSpreadsheet() {
     sheet_enabled = true;
 
     const D50 = sheet.getCellByA1('D50');
-    D50.value = Date().toLocaleString('en-GB', { timeZone: 'GMT+1' });
+    D50.value = Date().toLocaleString('en-GB', { timeZone: 'Europe/Malta' });
     await sheet.saveUpdatedCells();
 
     const exampleEmbed = new Discord.MessageEmbed()
