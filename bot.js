@@ -19,7 +19,7 @@ let kickDelay = null;
 
 const client = new Discord.Client();
 const PREFIX = "🥚"
-const kick_X = "450287369766305822" // This is by default Shapac. edit D8 to change it's value.
+let kick_X = "450287369766305822" // This is by default Shapac. edit D8 to change it's value.
 let prev_no = -10;
 let muteMap = new Map()
 
