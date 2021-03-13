@@ -32,11 +32,10 @@ function getNumber() {
     let min = 0;
     let max = JBSVIDEOS.length;
     let i = Math.floor(Math.random() * (max - min)) + min;
-    while (i == prev_no) {
-        i = Math.floor(Math.random() * (max - min)) + min;
-        prev_no = i;
+    if (prev_no === i) {
+        i = getNumber();
     }
-
+    prev_no = i;
     return i;
 };
 
