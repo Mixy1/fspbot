@@ -19,7 +19,7 @@ let kickDelay = null;
 
 const client = new Discord.Client();
 const PREFIX = "🥚"
-const SHAPAC = "450287369766305822"
+const kick_X = "450287369766305822" // This is by default Shapac. edit D8 to change it's value.
 let prev_no = -10;
 let muteMap = new Map()
 
@@ -85,7 +85,7 @@ client.on('message', async (msg) => {
                 if (agreed.count > disagreed.count) {
                     await msg.guild.member(msg.mentions.users.first()).roles.add(role);
                     if (muteMap.has(msg.mentions.users.first().id) && ((new Date().getTime() - muteMap.get(msg.mentions.users.first().id)) < 14400000)) {
-                        msg.channel.send('User has been muted in the past 4 hour skipping....')
+                        msg.channel.send('User has been muted in the past 4 hours skipping....')
                         return;
                     }
                     else {
@@ -93,7 +93,7 @@ client.on('message', async (msg) => {
                     }
                     if (msg.guild.member(msg.mentions.users.first()).voice.channel)
                         await msg.guild.member(msg.mentions.users.first()).voice.setMute(true);
-                    if (msg.mentions.users.first().id == SHAPAC)
+                    if (msg.mentions.users.first().id == kick_X)
                         usermute = 900000
                     setTimeout(function () {
                         console.log("unmuting: " + msg.mentions.users.first());
@@ -142,13 +142,13 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
         async function vcKick() {
             await newState.member.voice.kick();
-            client.channels.cache.get("820219287938793523").messages.fetch("820231421465591829").then(message => message.edit(">>> Shapac has been **kicked**🎉🎉🎉🎉 - Courtesy of <@91974715383488512>\n" + Date().toString()));
+            client.channels.cache.get("820219287938793523").messages.fetch("820231421465591829").then(message => message.edit(">>> 🤡 has been **kicked**🎉🎉🎉🎉 - Courtesy of <@91974715383488512>\n" + Date().toLocaleString('en-GB', { timeZone: 'GMT+1' })));
         }
-        if (oldChannel === null && newChannel !== null && newState.member.id == SHAPAC) {
+        if (oldChannel === null && newChannel !== null && newState.member.id == kick_X) {
             let randomDC = genRandomDC() * 1000;
             kickDelay = setTimeout(() => {vcKick();}, randomDC);
         }
-        else if (oldChannel !== null && newChannel === null && newState.member.id == SHAPAC) {
+        else if (oldChannel !== null && newChannel === null && newState.member.id == kick_X) {
             clearTimeout(kickDelay);
         }
     }
@@ -192,12 +192,13 @@ async function accessSpreadsheet() {
         lowerbound = sheet.getCell(2, 3).value;
         upperbound = sheet.getCell(3, 3).value;
         jotime_link = sheet.getCellByA1('D7').value;
+        kick_X = parseInt(sheet.getCellByA1('D8').value);
     })
 
     sheet_enabled = true;
 
     const D50 = sheet.getCellByA1('D50');
-    D50.value = Date().toString();
+    D50.value = Date().toLocaleString('en-GB', { timeZone: 'GMT+1' });
     await sheet.saveUpdatedCells();
 
     const exampleEmbed = new Discord.MessageEmbed()
