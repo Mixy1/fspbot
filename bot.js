@@ -40,11 +40,11 @@ function getNumber() {
 };
 
 
-let scheduledMessage = new cron.CronJob('0 */6 * * *', () => {
-    let channel = client.channels.cache.get('404664933452873732');
-    channel.send(SHAPACSWEARWORDS[Math.floor(Math.random() * SHAPACSWEARWORDS.length)]);
-});
-scheduledMessage.start()
+// let scheduledMessage = new cron.CronJob('0 */6 * * *', () => {
+//     let channel = client.channels.cache.get('404664933452873732');
+//     channel.send(SHAPACSWEARWORDS[Math.floor(Math.random() * SHAPACSWEARWORDS.length)]);
+// });
+// scheduledMessage.start()
 
 function genRandomDC() {
     return lowerbound + Math.floor(Math.random() * (upperbound - lowerbound));
