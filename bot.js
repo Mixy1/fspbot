@@ -132,6 +132,7 @@ client.on('message', async (msg) => {
         else {
             msg.reply("You have to be in a voice channel!")
         }
+        msg.delete({timeout: 5000})
     }
 });
 
