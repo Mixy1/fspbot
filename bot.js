@@ -130,6 +130,7 @@ client.on('message', async (msg) => {
                 else {
                     msg.reply("You have to be in a voice channel!")
                 }
+                break;
             case "pause":
                 if (msg.member.voice.channel) {
                     cur_channel = msg.member.voice.channel;
@@ -140,6 +141,7 @@ client.on('message', async (msg) => {
                 else {
                     msg.reply("You have to be in a voice channel!")
                 }
+                break;
         }
     }
     else if (msg.content.startsWith('<:JamesPog:')) {
