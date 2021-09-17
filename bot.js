@@ -120,6 +120,17 @@ client.on('message', async (msg) => {
                     msg.reply("You are not in a voice channel!")
                 }
                 break;
+            case "play":
+                if (msg.member.voice.channel) {
+                    cur_channel = msg.member.voice.channel;
+                    let connection = await cur_channel.join()
+                    let dispatcher = await connection.play(ytdl(msg.content.replace('🥚play ', ''), { filter: 'audioonly' }))
+                    dispatcher.on('finish', _end => { cur_channel.leave() });
+                }
+                else {
+                    msg.reply("You have to be in a voice channel!")
+                }
+                msg.delete({timeout: 5000})
         }
     }
     else if (msg.content.startsWith('<:JamesPog:')) {
