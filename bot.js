@@ -142,7 +142,7 @@ client.on("message", async (msg) => {
         if (msg.member.voice.channel) {
           cur_channel = msg.member.voice.channel;
           let url = msg.content.replace("🥚play ", "");
-          ytdl.getInfo(
+          await ytdl.getInfo(
             url,
             { downloadURL: true },
             function (err, info) {
