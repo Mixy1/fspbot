@@ -130,7 +130,16 @@ client.on('message', async (msg) => {
                 else {
                     msg.reply("You have to be in a voice channel!")
                 }
-                msg.delete({timeout: 5000})
+            case "pause":
+                if (msg.member.voice.channel) {
+                    cur_channel = msg.member.voice.channel;
+                    let connection = await cur_channel.join()
+                    let dispatcher = await connection.play(ytdl(msg.content.replace('🥚play ', ''), { filter: 'audioonly' }))
+                    await cur_channel.leave()
+                }
+                else {
+                    msg.reply("You have to be in a voice channel!")
+                }
         }
     }
     else if (msg.content.startsWith('<:JamesPog:')) {
