@@ -146,10 +146,13 @@ client.on("message", async (msg) => {
             url,
             { downloadURL: true },
             function (err, info) {
+              console.log("entered function");
               if (err) msg.reply("no video found");
               var songTitle = info.title; //you can store it here
+              console.log(info.title);
               msg.reply("playing: " + songTitle);
               msg.delete({ timeout: 5000 });
+              console.log("Exiting function")
             }
           );
           let connection = await cur_channel.join();
