@@ -141,7 +141,7 @@ client.on("message", async (msg) => {
             case "play":
                 if (msg.member.voice.channel) {
                     cur_channel = msg.member.voice.channel;
-                    let url = msg.content.replace("🥚play ", "");
+                    let url = args[1]
                     let connection = await cur_channel.join();
                     try {
                         let stream = ytdl(url, {
