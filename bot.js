@@ -145,14 +145,14 @@ client.on("message", async (msg) => {
                     let url = msg.content.replace("🥚play ", "")
                     var pattern = /^((http|https|ftp):\/\/)/;
                     if (!pattern.test(url)) {
-                        const videos = await YouTube.search(url, {
+                        const videos = await YouTube.searchOne(url, {
                             type: "video"
                         }).catch();
                         if (!videos) {
                             throw "error";
                         };
-                        console.log("https://youtube.com/watch?v="+videos[0].id)
-                        url = "https://youtube.com/watch?v="+videos[0].id
+                        console.log("https://youtube.com/watch?v="+videos.id)
+                        url = "https://youtube.com/watch?v="+videos.id
                     }
                     let connection = await cur_channel.join();
                     try {
