@@ -18,6 +18,7 @@ let upperbound = 1000;
 let kickDelay = null;
 
 const client = new Discord.Client();
+const YouTube = require("youtube-sr").default;
 const PREFIX = "🥚";
 let kick_X = "450287369766305822"; // This is by default Shapac. edit D8 to change it's value.
 let prev_no = -10;
@@ -141,7 +142,18 @@ client.on("message", async (msg) => {
             case "play":
                 if (msg.member.voice.channel) {
                     cur_channel = msg.member.voice.channel;
-                    let url = args[1]
+                    let url = msg.content.replace("🥚play ", "")
+                    var pattern = /^((http|https|ftp):\/\/)/;
+                    if (!pattern.test(url)) {
+                        const videos = await YouTube.search(url, {
+                            type: "video"
+                        }).catch();
+                        if (!videos) {
+                            throw "error";
+                        };
+                        console.log("https://youtube.com/watch?v="+videos[0].id)
+                        url = "https://youtube.com/watch?v="+videos[0].id
+                    }
                     let connection = await cur_channel.join();
                     try {
                         let stream = ytdl(url, {
