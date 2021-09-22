@@ -57,75 +57,86 @@ client.on("message", async (msg) => {
     if (msg.content.startsWith(PREFIX)) {
         switch (args[0].toLowerCase()) {
             case "mute":
-                let usermute = 300000;
-                if (!msg.mentions.users.first())
-                    return msg.channel.send("you need to mention somebody!!");
+                let mute_duration = 300000;
+                const muted_user = msg.mentions.users.first();
+                const muted_role = msg.guild.roles.cache.find((r) => r.name === "Muted");
 
-                const voting = new Discord.MessageEmbed()
-                    .setColor("#42b34d")
-                    .setFooter("Mute " + msg.mentions.users.first().tag + " for 5m?")
-                    .setImage(msg.mentions.users.first().avatarURL);
-                const role = msg.guild.roles.cache.find((r) => r.name === "Muted");
-                if (!role)
+                if (!muted_user)
+                    return msg.channel.send("you need to mention somebody!!");
+                if (!muted_role)
                     return msg.channel.send(
                         "No Role was found, please make sure you have a muted role."
                     );
+
+                if (
+                    muteMap.has(muted_user.id) &&
+                    new Date().getTime() - muteMap.get(muted_user.id) < 14400000
+                ) {
+                    msg.channel.send(
+                        "User has been muted in the past 4 hours skipping...."
+                    );
+                    return;
+                }
+
+                const voting = new Discord.MessageEmbed()
+                    .setColor("#42b34d")
+                    .setFooter("Mute " + muted_user.tag + " for 5m?")
+                    .setImage(muted_user.avatarURL);
+
                 const agree = "✅";
                 const disagree = "❌";
                 const sentEmbed = await msg.channel.send(voting);
-                const filter = (reaction, user) =>
-                    (reaction.emoji.name === agree || reaction.emoji.name === disagree) &&
-                    !user.bot;
                 await sentEmbed.react(agree);
                 await sentEmbed.react(disagree);
 
                 const voteStatus = await msg.channel.send(
                     "Voting started 30 seconds left"
                 );
+
+                const filter = (reaction, user) =>
+                    (reaction.emoji.name === agree || reaction.emoji.name === disagree) &&
+                    !user.bot;
                 const collected = await sentEmbed.awaitReactions(filter, {
                     time: 30000,
                 });
+
                 const agreed = collected.get(agree) || { count: 1 };
                 const disagreed = collected.get(disagree) || { count: 1 };
                 const agreed_count = agreed.count;
                 const disagreed_count = disagreed.count;
+
                 voteStatus.edit(
                     "Voting ended with: " +
-                    agreed_count +
-                    agree +
-                    " and " +
-                    disagreed_count +
-                    disagree
+                        agreed_count +
+                        " " +
+                        agree +
+                        " and " +
+                        disagreed_count +
+                        " " +
+                        disagree +
+                        "."
                 );
-                if (agreed.count > disagreed.count) {
-                    await msg.guild.member(msg.mentions.users.first()).roles.add(role);
-                    if (
-                        muteMap.has(msg.mentions.users.first().id) &&
-                        new Date().getTime() - muteMap.get(msg.mentions.users.first().id) <
-                        14400000
-                    ) {
-                        msg.channel.send(
-                            "User has been muted in the past 4 hours skipping...."
-                        );
-                        return;
-                    } else {
-                        muteMap.set(msg.mentions.users.first().id, new Date().getTime());
-                    }
-                    if (msg.guild.member(msg.mentions.users.first()).voice.channel)
-                        await msg.guild
-                            .member(msg.mentions.users.first())
-                            .voice.setMute(true);
-                    if (msg.mentions.users.first().id == kick_X) usermute = 900000;
-                    setTimeout(function () {
-                        console.log("unmuting: " + msg.mentions.users.first());
-                        if (msg.guild.member(msg.mentions.users.first()).voice.channel) {
-                            msg.guild.member(msg.mentions.users.first()).voice.setMute(false);
-                        }
-                        msg.guild.member(msg.mentions.users.first()).roles.remove(role);
-                    }, usermute);
-                } else {
+
+                if (agreed.count <= disagreed.count) {
                     msg.channel.send("Mute Voting Failed 🥚");
+                    return;
                 }
+
+                await msg.guild.member(muted_user).roles.add(muted_role);
+                muteMap.set(muted_user.id, new Date().getTime());
+
+                if (msg.guild.member(muted_user).voice.channel)
+                    await msg.guild.member(muted_user).voice.setMute(true);
+
+                if (muted_user.id === kick_X) mute_duration *= 3;
+                setTimeout(function () {
+                    console.log("Unmuting " + muted_user + ".");
+                    if (msg.guild.member(muted_user).voice.channel) {
+                        msg.guild.member(muted_user).voice.setMute(false);
+                    }
+                    msg.guild.member(muted_user).roles.remove(muted_role);
+                }, mute_duration);
+
                 break;
 
             case "jotime":
@@ -133,83 +144,99 @@ client.on("message", async (msg) => {
                 break;
 
             case "leave":
-                if (msg.member.voice.channel) {
-                    msg.member.voice.channel.leave();
-                } else {
+                if (!msg.member.voice.channel) {
                     msg.reply("You are not in a voice channel!");
+                    return;
                 }
+
+                msg.member.voice.channel.leave();
                 break;
+
             case "play":
-                if (msg.member.voice.channel) {
-                    cur_channel = msg.member.voice.channel;
-                    let url = msg.content.replace("🥚play ", "")
-                    var pattern = /^((http|https|ftp):\/\/)/;
-                    if (!pattern.test(url)) {
-                        const videos = await YouTube.search(url, {
-                            type: "video"
-                        }).catch();
-                        if (!videos) {
-                            throw "error";
-                        };
-                        console.log("https://youtube.com/watch?v="+videos[0].id)
-                        url = "https://youtube.com/watch?v="+videos[0].id
+                if (!msg.member.voice.channel) {
+                    msg.reply("You have to be in a voice channel!");
+                    return;
+                }
+
+                const cur_channel = msg.member.voice.channel;
+                let url = msg.content.replace("🥚play ", "");
+
+                var pattern = /^((http|https|ftp):\/\/)/;
+                if (!pattern.test(url)) {
+                    const videos = await YouTube.search(url, {
+                        type: "video",
+                    }).catch();
+
+                    if (!videos) {
+                        msg.reply(`No videos found for "${url}"`);
+                        throw new Error(`No videos found for "${url}"`);
                     }
-                    let connection = await cur_channel.join();
-                    try {
-                        let stream = ytdl(url, {
-                            filter: "audioonly",
-                        }).on("info", (info) => {
-                            let title = "";
-                            title = "playing: " + info.player_response.videoDetails.title;
-                            msg.reply(title);
-                            msg.delete({ timeout: 2000 })
-                        }).on("error", (err) => {
+
+                    url = "https://youtube.com/watch?v=" + videos[0].id;
+                    console.log(url);
+                }
+
+                let connection = await cur_channel.join();
+                try {
+                    let stream = /** await **/ ytdl(url, {
+                        filter: "audioonly",
+                    })
+                        .on("info", (info) => {
+                            msg.reply(
+                                `Playing: ${info.player_response.videoDetails.title}`
+                            );
+                            msg.delete({ timeout: 2000 });
+                        })
+                        .on("error", (err) => {
                             // Duplicate error handling her cause asynchronous and i don't feel like dealing with it.
                             msg.reply("no video found");
                             msg.delete({ timeout: 2000 });
                             cur_channel.leave();
                         });
 
-                        let dispatcher = await connection.play(stream);
-                        dispatcher.on("error", (err) => { throw err });
-                        dispatcher.on("finish", (_end) => {
-                            cur_channel.leave();
-                        });
-                    } catch (error) {
-                        await msg.reply("no video found");
-                        await msg.delete({ timeout: 2000 });
-                        // cur_channel.leave();
-                    }
-                } else {
-                    msg.reply("You have to be in a voice channel!");
+                    let dispatcher = await connection.play(stream);
+                    dispatcher.on("error", (err) => {
+                        throw err;
+                    });
+                    dispatcher.on("finish", (_end) => {
+                        cur_channel.leave();
+                    });
+                } catch (error) {
+                    await msg.reply("no video found");
+                    await msg.delete({ timeout: 2000 });
+                    // cur_channel.leave();
                 }
+
                 break;
             case "pause":
-                if (msg.member.voice.channel) {
-                    cur_channel = msg.member.voice.channel;
-                    let connection = await cur_channel.join();
-                    let dispatcher = await connection.play(
-                        ytdl(msg.content.replace("🥚play ", ""), { filter: "audioonly" })
-                    );
-                    await cur_channel.leave();
-                } else {
+                if (!msg.member.voice.channel) {
                     msg.reply("You have to be in a voice channel!");
+                    return;
                 }
+
+                cur_channel = msg.member.voice.channel;
+                let connection = await cur_channel.join();
+                let dispatcher = await connection.play(
+                    ytdl(msg.content.replace("🥚play ", ""), { filter: "audioonly" })
+                );
+                await cur_channel.leave();
+
                 break;
         }
     } else if (msg.content.startsWith("<:JamesPog:")) {
-        if (msg.member.voice.channel) {
-            cur_channel = msg.member.voice.channel;
-            let connection = await cur_channel.join();
-            let dispatcher = await connection.play(
-                ytdl(JBSVIDEOS[getNumber()], { filter: "audioonly" })
-            );
-            dispatcher.on("finish", (_end) => {
+        if (!msg.member.voice.channel) msg.reply("You have to be in a voice channel!");
+
+        cur_channel = msg.member.voice.channel;
+        let connection = await cur_channel.join();
+        let dispatcher = await connection.play(
+            ytdl(JBSVIDEOS[getNumber()], { filter: "audioonly" })
+        );
+        dispatcher.on("finish", (_end) => {
+            setTimeout(() => {
                 cur_channel.leave();
-            });
-        } else {
-            msg.reply("You have to be in a voice channel!");
-        }
+            }, 500);
+        });
+
         msg.delete({ timeout: 5000 });
     }
 });
@@ -227,24 +254,16 @@ client.on("voiceStateUpdate", (oldState, newState) => {
                 .then((message) =>
                     message.edit(
                         ">>> 🤡 has been **kicked**🎉🎉🎉🎉 - Courtesy of <@91974715383488512>\n" +
-                        Date().toLocaleString("en-GB", { timeZone: "Europe/Malta" })
+                            Date().toLocaleString("en-GB", { timeZone: "Europe/Malta" })
                     )
                 );
         }
-        if (
-            oldChannel === null &&
-            newChannel !== null &&
-            newState.member.id == kick_X
-        ) {
+        if (!oldChannel && newChannel && newState.member.id === kick_X) {
             let randomDC = genRandomDC() * 1000;
             kickDelay = setTimeout(() => {
                 vcKick();
             }, randomDC);
-        } else if (
-            oldChannel !== null &&
-            newChannel === null &&
-            newState.member.id == kick_X
-        ) {
+        } else if (oldChannel && !newChannel && newState.member.id == kick_X) {
             clearTimeout(kickDelay);
         }
     }
