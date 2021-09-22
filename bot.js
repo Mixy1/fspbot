@@ -206,8 +206,8 @@ client.on("message", async (msg) => {
                     await msg.delete({ timeout: 2000 });
                     // cur_channel.leave();
                 }
-
                 break;
+
             case "pause":
                 if (!msg.member.voice.channel) {
                     msg.reply("You have to be in a voice channel!");
@@ -215,7 +215,7 @@ client.on("message", async (msg) => {
                 }
 
                 cur_channel = msg.member.voice.channel;
-                let connection = await cur_channel.join();
+                connection = await cur_channel.join();
                 let dispatcher = await connection.play(
                     ytdl(msg.content.replace("🥚play ", ""), { filter: "audioonly" })
                 );
