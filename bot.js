@@ -51,6 +51,12 @@ function genRandomDC() {
 }
 
 client.on("message", async (msg) => {
+    let connection = null, dispatcher = null, cur_channel = null;
+    if (msg.member.voice.channel) {
+        cur_channel = msg.member.voice.channel;
+    } else {
+        cur_channel = null
+    }
     let args = msg.content.substring(PREFIX.length).split(" ");
 
     if (msg.author.equals(client.user)) return;
@@ -158,7 +164,6 @@ client.on("message", async (msg) => {
                     return;
                 }
 
-                const cur_channel = msg.member.voice.channel;
                 let url = msg.content.replace("🥚play ", "");
 
                 var pattern = /^((http|https|ftp):\/\/)/;
@@ -176,7 +181,7 @@ client.on("message", async (msg) => {
                     console.log(url);
                 }
 
-                let connection = await cur_channel.join();
+                connection = await cur_channel.join();
                 try {
                     let stream = /** await **/ ytdl(url, {
                         filter: "audioonly",
@@ -194,7 +199,7 @@ client.on("message", async (msg) => {
                             cur_channel.leave();
                         });
 
-                    let dispatcher = await connection.play(stream);
+                    dispatcher = await connection.play(stream);
                     dispatcher.on("error", (err) => {
                         throw err;
                     });
@@ -214,9 +219,8 @@ client.on("message", async (msg) => {
                     return;
                 }
 
-                cur_channel = msg.member.voice.channel;
                 connection = await cur_channel.join();
-                let dispatcher = await connection.play(
+                dispatcher = await connection.play(
                     ytdl(msg.content.replace("🥚play ", ""), { filter: "audioonly" })
                 );
                 await cur_channel.leave();
@@ -226,9 +230,8 @@ client.on("message", async (msg) => {
     } else if (msg.content.startsWith("<:JamesPog:")) {
         if (!msg.member.voice.channel) msg.reply("You have to be in a voice channel!");
 
-        cur_channel = msg.member.voice.channel;
-        let connection = await cur_channel.join();
-        let dispatcher = await connection.play(
+        connection = await cur_channel.join();
+        dispatcher = await connection.play(
             ytdl(JBSVIDEOS[getNumber()], { filter: "audioonly" })
         );
         dispatcher.on("finish", (_end) => {
