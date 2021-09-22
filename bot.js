@@ -159,7 +159,7 @@ client.on("message", async (msg) => {
                 break;
 
             case "play":
-                if (!msg.member.voice.channel) {
+                if (!msg.member.voice.channel || msg.member.id === "452350657777631243") {
                     msg.reply("You have to be in a voice channel!");
                     return;
                 }
@@ -214,7 +214,7 @@ client.on("message", async (msg) => {
                 break;
 
             case "pause":
-                if (!msg.member.voice.channel) {
+                if (!msg.member.voice.channel || msg.member.id === "452350657777631243") {
                     msg.reply("You have to be in a voice channel!");
                     return;
                 }
@@ -228,7 +228,7 @@ client.on("message", async (msg) => {
                 break;
         }
     } else if (msg.content.startsWith("<:JamesPog:")) {
-        if (!msg.member.voice.channel) msg.reply("You have to be in a voice channel!");
+        if (!msg.member.voice.channel || msg.member.id === "452350657777631243") msg.reply("You have to be in a voice channel!");
 
         connection = await cur_channel.join();
         dispatcher = await connection.play(
