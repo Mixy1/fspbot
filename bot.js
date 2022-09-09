@@ -312,9 +312,9 @@ async function accessSpreadsheet() {
 
     sheet_enabled = true;
 
-    // const D50 = sheet.getCellByA1('D50');
-    // D50.value = Date().toLocaleString('en-GB', { timeZone: 'Europe/Malta' });
-    // await sheet.saveUpdatedCells();
+    const D50 = sheet.getCellByA1('D50');
+    D50.value = Date().toLocaleString('en-GB', { timeZone: 'Europe/Malta' });
+    await sheet.saveUpdatedCells();
 
     const exampleEmbed = new Discord.MessageEmbed()
         .setColor("#0099ff")
